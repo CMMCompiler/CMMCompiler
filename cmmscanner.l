@@ -28,8 +28,7 @@ OPERATOR    ([+-/*<>=;,(){}])
 [ \t\r\a]+ { /* ignore spaces */ }
 
 {NUM} { return T_intconst; }
-{ID} { return T_comment; }
-
+{ID} { return T_identifier; }
 %%
 
 int main(int argc, char* agrv[]) {
