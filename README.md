@@ -15,5 +15,5 @@ brew install bison
 ```
 flex cmmscanner.l # output: let.yy.c
 gcc -o cmmscanner lex.yy.c # output: cmmscanner
-./scanner < sample.c > out.txt #output: out.txt
+./cmmscanner < sample.c #output: out.txt
 ```

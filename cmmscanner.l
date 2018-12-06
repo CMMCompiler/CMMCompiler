@@ -1,4 +1,5 @@
 %{
+#include "token.h"
 int cur_line_num = 1;
 %}
 
@@ -6,46 +7,38 @@ DIGIT       ([0-9])
 LETTER      ([a-zA-Z])
 NUM         ({DIGIT}{DIGIT}*)
 ID          ({LETTER}{LETTER}*)
+OPERATOR    ([+-/*<>=;,(){}])
 
 %%
-("/*"[\0-\127]*"*/") { printf("COMMENT\n"); }
-"else" { printf("else\n"); }
-"if" { printf("if\n"); }
-"int" { printf("int\n"); }
-"return" { printf("return\n"); }
-"void" { printf("void\n"); }
-"while" { printf("while\n"); }
+{OPERATOR} { return yytext[0]; }
+("/*"[\0-\127]*"*/") { return T_comment; }
+"else" { return T_else; }
+"if" { return T_if; }
+"int" { return T_int; }
+"return" { return T_return; }
+"void" { return T_void; }
+"while" { return T_while; }
 
-"+" { printf("+\n"); }
-"-" { printf("-\n"); }
-"*" { printf("*\n"); }
-"/" { printf("/\n"); }
-"<" { printf("<\n"); }
-"<=" { printf("<=\n"); }
-">" { printf(">\n"); }
-">=" { printf(">=\n"); }
-"==" { printf("==\n"); }
-"!=" { printf("!=\n"); }
-"=" { printf("=\n"); }
-";" { printf(";\n"); }
-"," { printf(",\n"); }
-"(" { printf("(\n"); }
-")" { printf(")\n"); }
-"[" { printf("[\n"); }
-"]" { printf("]\n"); }
-"{" { printf("{\n"); }
-"}" { printf("}\n"); }
-
+"<=" { return T_lte; }
+">=" { return T_gte; }
+"==" { return T_eql; }
+"!=" { return T_neq; }
 
 [\n] { cur_line_num++; }
 [ \t\r\a]+ { /* ignore spaces */ }
 
-{NUM} { printf("NUM\n"); }
-{ID} { printf("ID\n"); }
+{NUM} { return T_intconst; }
+{ID} { return T_comment; }
+
 %%
 
 int main(int argc, char* agrv[]) {
-    yylex();
+    int token;
+    while (token = yylex()) {
+        print_token(token);
+        puts(yytext);
+    }
+    return 0;
 }
 
 int yywrap(void) {
