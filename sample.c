@@ -1,1 +1,6 @@
-int
+void main(void)
+{
+
+	/*output(c);*/
+    
+}

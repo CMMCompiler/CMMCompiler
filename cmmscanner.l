@@ -11,8 +11,8 @@ ID          ({LETTER}{LETTER}*)
 OPERATOR    ([+-/*<>=;,(){}])
 
 %%
+("/*"(([^\*]*(\*[^\/])?)*)"*/") { }
 {OPERATOR} { return yytext[0]; }
-("/*"[\0-\127]*"*/") { return T_comment; }
 "else" { return T_else; }
 "if" { return T_if; }
 "int" { return T_int; }

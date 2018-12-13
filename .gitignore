@@ -1,0 +1,3 @@
+*.exe
+y.*
+lex.yy.c

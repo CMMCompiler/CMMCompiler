@@ -13,7 +13,10 @@ void yyerror (char const *s) {
 %left '*' '/'
 
 %%
-program : declaration_list{printf("fuck");}
+
+
+
+program : declaration_list
         ;
 
 declaration_list : declaration_list declaration
@@ -24,7 +27,8 @@ declaration : var_declaration
             | fun_declaration
             ;
 
-var_declaration : type_specifier  T_identifier ';'{printf("fuck2");}
+
+var_declaration : type_specifier  T_identifier ';'
                 | type_specifier  T_identifier '[' T_intconst ']' ';'
                 ;
 
@@ -100,6 +104,7 @@ relop : T_lte
       | T_eql
       | T_neq
       ;
+
 
 additive_expression : additive_expression addop term
                     | term
