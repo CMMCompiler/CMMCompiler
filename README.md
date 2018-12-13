@@ -16,10 +16,9 @@ apt-get install flex bison
 ```
 ### Windows
 
-```
-Download flexbison from : [Flexbison](https://sourceforge.net/projects/winflexbison/)
-Add flexbison to system path
-```
+* Download flexbison from:  [Flexbison](https://sourceforge.net/projects/winflexbison/)
+* Add flexbison to system path
+
 
 ## Run
 
@@ -31,7 +30,7 @@ gcc -o cmm lex.yy.c y.tab.c # output: cmmscanner
 ./cmm < sample.c
 ```
 
-###Windows
+### Windows
 ```
 .\run.bat
 .\cmm.exe < sample.c
