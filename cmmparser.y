@@ -1,7 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-void yyerror(const char*);
+void yyerror (char const *s) {
+  fprintf (stderr, "%s\n", s);
+}
 #define YYSTYPE char *
 %}
 
@@ -11,7 +13,7 @@ void yyerror(const char*);
 %left '*' '/'
 
 %%
-program : declaration_list
+program : declaration_list{printf("fuck");}
         ;
 
 declaration_list : declaration_list declaration
@@ -22,7 +24,7 @@ declaration : var_declaration
             | fun_declaration
             ;
 
-var_declaration : type_specifier  T_identifier ';'
+var_declaration : type_specifier  T_identifier ';'{printf("fuck2");}
                 | type_specifier  T_identifier '[' T_intconst ']' ';'
                 ;
 

@@ -1,5 +1,6 @@
 %{
-#include "token.h"
+//#include "token.h"
+#include "y.tab.h"
 int cur_line_num = 1;
 %}
 
@@ -30,15 +31,6 @@ OPERATOR    ([+-/*<>=;,(){}])
 {NUM} { return T_intconst; }
 {ID} { return T_identifier; }
 %%
-
-int main(int argc, char* agrv[]) {
-    int token;
-    while (token = yylex()) {
-        print_token(token);
-        puts(yytext);
-    }
-    return 0;
-}
 
 int yywrap(void) {
     return 1;
