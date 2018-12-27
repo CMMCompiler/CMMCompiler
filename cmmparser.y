@@ -4,6 +4,7 @@
 void yyerror (char const *s) {
   fprintf (stderr, "%s\n", s);
 }
+int yylex();
 #define YYSTYPE char *
 %}
 
@@ -84,6 +85,7 @@ statement1 :
 expression_stmt : expression ';'
                 | ';'
                 ;
+
 
 
 iteration_stmt :  T_while '(' expression ')' statement
