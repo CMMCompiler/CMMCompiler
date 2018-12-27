@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "node.h"
+extern int yylex();
 void yyerror (char const *s) {
   fprintf (stderr, "%s\n", s);
 }
