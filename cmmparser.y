@@ -6,7 +6,6 @@ extern int yylex();
 void yyerror (char const *s) {
   fprintf (stderr, "%s\n", s);
 }
-int yylex();
 #define YYSTYPE char *
 %}
 
