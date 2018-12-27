@@ -63,22 +63,33 @@ statement_list : statement_list statement
                | empty
                ;
 
-statement : expression_stmt
+statement :
+          T_if '(' expression ')' statement1  T_else statement
+          | T_if '(' expression ')' statement
+          | expression_stmt
           | compound_stmt
-          | selection_stmt
           | iteration_stmt
           | return_stmt
           ;
+
+statement1 :
+          T_if '(' expression ')' statement1  T_else statement1
+          | expression_stmt
+          | compound_stmt
+          | iteration_stmt1
+          | return_stmt
+          ;
+
         
 expression_stmt : expression ';'
                 | ';'
                 ;
 
-selection_stmt :  T_if '(' expression ')' statement
-               |  T_if '(' expression ')' statement  T_else statement
-               ;
 
 iteration_stmt :  T_while '(' expression ')' statement
+               ;
+
+iteration_stmt1 :  T_while '(' expression ')' statement1
                ;
 
 return_stmt :  T_return ';'
