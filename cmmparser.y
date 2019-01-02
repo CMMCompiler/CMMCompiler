@@ -62,9 +62,9 @@ declaration : var_declaration
             ;
 
 
-var_declaration : type_specifier  T_identifier ';'
+var_declaration : type_specifier  T_identifier T_semicolon
                   { $$ = new NVariableDeclaration(*$1, *$2); }
-                | type_specifier  T_identifier '[' T_intconst ']' ';'
+                | type_specifier  T_identifier T_lbracket T_intconst T_rbracket T_semicolon
                   { $$ = new NVariableDeclaration(*$1, *$2, *$4); }
                 ;
 
@@ -74,17 +74,17 @@ type_specifier :  T_int
                   { $$ = new NIdentifier(*$1); delete $1; }
                ;
 
-fun_declaration : type_specifier T_identifier '(' params ')' compound_stmt
-                  { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6)}
+fun_declaration : type_specifier T_identifier T_lparen params T_rparen compound_stmt
+                  { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6);}
                 ;
 
 params : params_list
-         { $$ = $1 }
+         { $$ = $1; }
        |  T_void
          { $$ = NULL; }
        ;
 
-params_list : params_list ',' param
+params_list : params_list T_comma param
               { $1->push_back($<var_decl>3); }
             | param
               { $$ = new VariableList(); $$->push_back($<var_decl>1); }
@@ -92,12 +92,12 @@ params_list : params_list ',' param
 
 param : type_specifier  T_identifier
         { $$ = new NVariableDeclaration(*$1, *$2); }
-      | type_specifier  T_identifier '['']'
+      | type_specifier  T_identifier T_lbracket T_rbracket
         { $$ = new NVariableDeclaration(*$1, *$2); }
       ;
 
-compound_stmt : '{' local_declarations statement_list '}'
-                { $$ = new NCompoundStatementDeclaration(*$2, *$3); $2 = new StatementList(); $3 = new ExpressionList() }
+compound_stmt : T_lbrace local_declarations statement_list T_rbrace
+                { $$ = new NCompoundStatementDeclaration(*$2, *$3); $2 = new StatementList(); $3 = new ExpressionList() ;}
               ;
 
 local_declarations : local_declarations var_declaration
@@ -112,9 +112,9 @@ statement_list : statement_list statement
                  { $$ = NULL; }
                ;
 
-statement : T_if '(' expression ')' statement1  T_else statement
+statement : T_if T_lparen expression T_rparen statement1  T_else statement
             { $$ = new NIfStatement(*$3, *$5, *$7); }
-          | T_if '(' expression ')' statement
+          | T_if T_lparen expression T_rparen statement
             { $$ = new NIfStatement(*$3, *$5); }
           | expression_stmt
             { $$ = $<expr>1; }
@@ -126,7 +126,7 @@ statement : T_if '(' expression ')' statement1  T_else statement
             { $$ = $<expr>1; }
           ;
 
-statement1 : T_if '(' expression ')' statement1  T_else statement1
+statement1 : T_if T_lparen expression T_rparen statement1  T_else statement1
              { $$ = new NIfStatement(*$3, *$5, *$7); }
            | expression_stmt
              { $$ = $<expr>1; }
@@ -139,25 +139,25 @@ statement1 : T_if '(' expression ')' statement1  T_else statement1
            ;
 
         
-expression_stmt : expression ';'
+expression_stmt : expression T_semicolon
                   { $$ = $<stmt>1; }
-                | ';'
+                | T_semicolon
                   { $$ = NULL; }
                 ;
 
 
 
-iteration_stmt :  T_while '(' expression ')' statement
+iteration_stmt :  T_while T_lparen expression T_rparen statement
                   { $$ = new NIterationStatement(*$3, *$5); }
                ;
 
-iteration_stmt1 :  T_while '(' expression ')' statement1
+iteration_stmt1 :  T_while T_lparen expression T_rparen statement1
                   { $$ = new NIterationStatement(*$3, *$5); }
                ;
 
-return_stmt :  T_return ';'
+return_stmt :  T_return T_semicolon
                { $$ = new NReturnStatement(); }
-            |  T_return expression ';'
+            |  T_return expression T_semicolon
                { $$ = new NReturnStatement(*$2); }
             ;
 
@@ -169,7 +169,7 @@ expression : var '=' expression
 
 var :  T_identifier
        { $$ = new NIdentifier(*$1); }
-    |  T_identifier '[' expression ']'
+    |  T_identifier T_lbracket expression T_rbracket
        { $$ = new NIdentifier(*$1, *$3); }
     ;
 
@@ -208,7 +208,7 @@ mulop : T_times
       | T_divide
       ;
 
-factor : '(' expression ')'
+factor : T_lparen expression T_rparen
          { $$ = $2; }
        | var
          { $$ = $1; }
@@ -218,7 +218,7 @@ factor : '(' expression ')'
          { $$ = $<expr>1; }
        ;
 
-call :  T_identifier '(' args ')'
+call :  T_identifier T_lparen args T_rparen
         { $$ = new NCallNode(*$1, *$3); }
      ;
 
@@ -228,7 +228,7 @@ args : arg_list
        { $$ = NULL; }
      ;
 
-arg_list : arg_list ',' expression
+arg_list : arg_list T_comma expression
            { $1->push_back($3); }
          | expression
            { $$ = new ExpressionList(); $$->push_back($1); }

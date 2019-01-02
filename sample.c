@@ -1,6 +1,4 @@
 void main(void)
 {
 
-	/*output(c);*/
-    
-}
+	int a;}
