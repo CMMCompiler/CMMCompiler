@@ -1,4 +1,3 @@
 *.exe
-y.*
-lex.yy.c
-cmm
+*.hpp
+*.cpp
