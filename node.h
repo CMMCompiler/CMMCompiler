@@ -37,10 +37,14 @@ public:
     // virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
+// used
 class NIdentifier : public NExpression {
 public:
     std::string name;
-    NIdentifier(const std::string& name) : name(name) { }
+    NExpression expression;
+    NIdentifier(std::string& name) : name(name) { }
+    NIdentifier(std::string& name, NExpression& expression) :
+        name(name), expression(expression) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
@@ -59,9 +63,18 @@ public:
     int op;
     NExpression& lhs;
     NExpression& rhs;
-    NBinaryOperator(NExpression& lhs, int op, NExpression& rhs) :
+    NBinaryOperator(NExpression& lhs, NExpression& rhs, int op) :
         lhs(lhs), rhs(rhs), op(op) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
+};
+
+class NComparisonExpression : public NExpression {
+public:
+    int op;
+    NExpression& lhs;
+    NExpression& rhs;
+    NComparisonExpression(NExpression& lhs, NExpression& rhs, int op) :
+        lhs(lhs), rhs(rhs), op(op) { }
 };
 
 class NAssignment : public NExpression {
@@ -88,26 +101,71 @@ public:
     // virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
+// used
 class NVariableDeclaration : public NStatement {
 public:
     const NIdentifier& type;
-    NIdentifier& id;
-    NExpression *assignmentExpr;
-    NVariableDeclaration(const NIdentifier& type, NIdentifier& id) :
+    std::string id;
+    std::string arrayRange;
+    NVariableDeclaration(const NIdentifier& type, std::string& id) :
         type(type), id(id) { }
-    NVariableDeclaration(const NIdentifier& type, NIdentifier& id, NExpression *assignmentExpr) :
-        type(type), id(id), assignmentExpr(assignmentExpr) { }
+    NVariableDeclaration(const NIdentifier& type, std::string& id, std::string arrayRange) :
+        type(type), id(id), arrayRange(arrayRange) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
+class NCompoundStatementDeclaration: public NBlock {
+public:
+    StatementList statelist;
+    ExpressionList expressionlist;
+    NCompoundStatementDeclaration(StatementList statelist, ExpressionList expressionlist) :
+        statelist(statelist), expressionlist(expressionlist) { }
+};
+
+class NReturnStatement: public NExpression {
+public:
+    NExpression result;
+    NReturnStatement() { }
+    NReturnStatement(NExpression& result) :
+        result(result) { }
+};
+
+// used
 class NFunctionDeclaration : public NStatement {
 public:
     const NIdentifier& type;
-    const NIdentifier& id;
+    std::string id;
     VariableList arguments;
     NBlock& block;
-    NFunctionDeclaration(const NIdentifier& type, const NIdentifier& id, 
+    NFunctionDeclaration(const NIdentifier& type, std::string& id, 
             const VariableList& arguments, NBlock& block) :
         type(type), id(id), arguments(arguments), block(block) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
+};
+
+class NIfStatement: public NExpression {
+public:
+    NExpression& condition;
+    NExpression trueblock;
+    NExpression falseblock;
+    NIfStatement(NExpression& condition, NExpression& trueblock) :
+        condition(condition), trueblock(trueblock) { }
+    NIfStatement(NExpression& condition, NExpression& trueblock, NExpression& falseblock) :
+        condition(condition), trueblock(trueblock), falseblock(falseblock) { }
+};
+
+class NIterationStatement: public NExpression {
+public:
+    NExpression& condition;
+    NExpression iterateblock;
+    NIterationStatement(NExpression& condition, NExpression& iterateblock) :
+        condition(condition), iterateblock(iterateblock) { }
+};
+
+class NCallNode: public NExpression {
+public:
+    std::string id;
+    ExpressionList arglist;
+    NCallNode(std::string id, ExpressionList& arglist) :
+        id(id), arglist(arglist) { }
 };
