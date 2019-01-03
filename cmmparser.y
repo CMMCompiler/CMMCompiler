@@ -219,7 +219,7 @@ call :  T_identifier T_lparen args T_rparen
 args : arg_list
        { $$ = $1; }
      | empty
-       { $$ = NULL; }
+       { $$ = new ExpressionList(); }
      ;
 
 arg_list : arg_list T_comma expression

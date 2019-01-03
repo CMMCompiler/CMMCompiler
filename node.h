@@ -187,7 +187,6 @@ public:
         for(auto it=statements.begin();it!=statements.end();it++)
             (*it)->print(depth+1);
     }
-
 };
 
 class NExpressionStatement : public NStatement {
@@ -344,14 +343,19 @@ public:
 class NCallNode: public NExpression {
 public:
     std::string id;
-    ExpressionList arglist;
+    ExpressionList& arglist;
     NCallNode(std::string id, ExpressionList& arglist) :
         id(id), arglist(arglist) { }
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
         puts("Call");
-        for(auto it=arglist.begin();it!=arglist.end();it++)
+        for (int i=0;i<depth+1;i++) {
+            printf("    ");
+        }
+        std::cout<<"function_name: "<<id<<std::endl;
+        for(auto it=arglist.begin();it!=arglist.end();it++) {
             (*it)->print(depth+1);
+        }
     }
 };
