@@ -95,8 +95,17 @@ public:
         for(int i=0;i<depth;i++)
             printf("    ");
         if(name=="void"||name=="int")std::cout<<"Type: "<<name<<std::endl;
-        else std::cout<<"Id: "<<name<<std::endl;
-        if (expression!=NULL)expression->print(depth+1);
+        else{
+            std::cout<<"Id: "<<name;
+            if (expression!=NULL){
+                std::cout<<"[]"<<std::endl;
+                for(int i=0;i<depth;i++)
+                    printf("    ");
+                std::cout<<"ArrayId:"<<std::endl;
+                expression->print(depth+1);
+            }
+            else std::cout<<std::endl;
+        }
     }
 };
 
