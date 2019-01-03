@@ -86,9 +86,9 @@ public:
 class NIdentifier : public NExpression {
 public:
     std::string name;
-    NExpression expression;
+    NExpression* expression;
     NIdentifier(std::string& name) : name(name) { }
-    NIdentifier(std::string& name, NExpression& expression) :
+    NIdentifier(std::string& name, NExpression* expression) :
         name(name), expression(expression) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
@@ -96,7 +96,7 @@ public:
             printf("    ");
         if(name=="void"||name=="int")std::cout<<"Type: "<<name<<std::endl;
         else std::cout<<"Id: "<<name<<std::endl;
-        expression.print(depth+1);
+        if (expression!=NULL)expression->print(depth+1);
     }
 };
 

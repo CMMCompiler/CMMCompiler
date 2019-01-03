@@ -165,7 +165,7 @@ expression : var T_assign expression
 var :  T_identifier
        { $$ = new NIdentifier(*$1); }
     |  T_identifier T_lbracket expression T_rbracket
-       { $$ = new NIdentifier(*$1, *$3); }
+       { $$ = new NIdentifier(*$1, $3); }
     ;
 
 simple_expression : additive_expression relop additive_expression
