@@ -15,6 +15,38 @@ class Node {
 public:
     virtual ~Node() {}
     virtual void print(int depth)const{}
+    void print_token(int token)const{
+        switch(token){
+            case 258:puts("T_intconst");break;
+            case 259:puts("T_identifier");break;
+            case 260:puts("T_void");break;
+            case 261:puts("T_int");break;
+            case 262:puts("T_lt");break;
+            case 263:puts("T_gt");break;
+            case 264:puts("T_lte");break;
+            case 265:puts("T_gte");break;
+            case 266:puts("T_eql");break;
+            case 267:puts("T_neq");break;
+            case 268:puts("T_while");break;
+            case 269:puts("T_if");break;
+            case 270:puts("T_else");break;
+            case 271:puts("T_return");break;
+            case 272:puts("T_add");break;
+            case 273:puts("T_minus");break;
+            case 274:puts("T_times");break;
+            case 275:puts("T_divide");break;
+            case 276:puts("T_assign");break;
+            case 277:puts("T_lparen");break;
+            case 278:puts("T_rparen");break;
+            case 279:puts("T_lbracket");break;
+            case 280:puts("T_rbracket");break;
+            case 281:puts("T_lbrace");break;
+            case 282:puts("T_rbrace");break;
+            case 283:puts("T_semicolon");break;
+            case 284:puts("T_comma");break;
+            default: puts("unknown token_type");
+        }
+    }
     // virtual llvm::Value* codeGen(CodeGenContext& context) { }
 };
 
@@ -90,7 +122,9 @@ public:
         puts("Binary Operator");
         for(int i=0;i<=depth;i++)
             printf("    ");
-        std::cout<<"Op: "<<op<<std::endl;
+        printf("Op: ");
+        print_token(op);
+        puts("");
         lhs.print(depth+1);
         rhs.print(depth+1);
     }
@@ -110,7 +144,9 @@ public:
         puts("Comparison Expression");
         for(int i=0;i<=depth;i++)
             printf("    ");
-        std::cout<<"Op: "<<op<<std::endl;
+        printf("Op: ");
+        print_token(op);
+        puts("");
         lhs.print(depth+1);
         rhs.print(depth+1);
     }
