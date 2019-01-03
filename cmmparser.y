@@ -210,7 +210,7 @@ factor : T_lparen expression T_rparen
        | call
          { $$ = $1; }
        | T_intconst
-         { $$ = $<expr>1; }
+         { $$ = new NInteger(atol($1->c_str())); }
        ;
 
 call :  T_identifier T_lparen args T_rparen
