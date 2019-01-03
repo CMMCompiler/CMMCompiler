@@ -61,7 +61,7 @@ public:
     long long value;
     NInteger(long long value) : value(value) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
-    void print(int depth){std::cout<<value<<std::endl;}
+    void print(int depth){printf("Int value: ");std::cout<<value<<std::endl;}
 };
 
 class NDouble : public NExpression {
@@ -69,7 +69,7 @@ public:
     double value;
     NDouble(double value) : value(value) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
-    void print(int depth){std::cout<<value<<std::endl;}
+    void print(int depth){printf("Double value: ");std::cout<<value<<std::endl;}
 };
 
 // used
@@ -84,7 +84,8 @@ public:
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
-        std::cout<<"Type: "<<name<<std::endl;
+        if(name=="void"||name=="int")std::cout<<"Type: "<<name<<std::endl;
+        else std::cout<<"Id: "<<name<<std::endl;
         expression.print(depth+1);
     }
 };
