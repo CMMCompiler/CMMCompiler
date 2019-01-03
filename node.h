@@ -110,7 +110,7 @@ public:
         puts("Comparison Expression");
         for(int i=0;i<=depth;i++)
             printf("    ");
-        printf("Op: %c\n",op);
+        std::cout<<"Op: "<<op<<std::endl;
         lhs.print(depth+1);
         rhs.print(depth+1);
     }
@@ -274,6 +274,8 @@ public:
         puts("If");
         condition.print(depth+1);
         trueblock.print(depth+1);
+        for(int i=0;i<depth;i++)
+            printf("    ");
         puts("Else");
         falseblock.print(depth+1);
     }
