@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include "node.h"
 extern int yylex();
+extern int yylineno;
 NBlock *programBlock;
 void yyerror (char const *s) {
-		printf("Error: %s\n", s);
+		//printf("Error: %s\n", s);
+    printf("Error on line %d: %s\n",yylineno-1,s);
 }
 %}
 

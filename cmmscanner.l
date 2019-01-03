@@ -7,7 +7,7 @@
 using namespace std;
 #define SAVE_TOKEN yylval.string = new string(yytext)
 #define TOKEN(t) ( yylval.token = t)
-int cur_line_num = 1;
+//int cur_line_num = 1;
 %}
 
 DIGIT       ([0-9])
@@ -17,6 +17,7 @@ ID          ({LETTER}{LETTER}*)
 OPERATOR    ([+-/*<>=;,(){}])
 
 %option noyywrap
+%option yylineno
 
 %%
 [ \t\r\a\n] { }
