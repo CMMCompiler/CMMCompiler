@@ -58,11 +58,10 @@ declaration : var_declaration
               { $$ = $1; }
             ;
 
-
 var_declaration : type_specifier  T_identifier T_semicolon
-                  { $$ = new NVariableDeclaration(*$1, *$2); }
+                  { $$ = new NVariableDeclaration(*$1, *(new NIdentifier(*$2))); }
                 | type_specifier  T_identifier T_lbracket T_intconst T_rbracket T_semicolon
-                  { $$ = new NVariableDeclaration(*$1, *$2, *$4); }
+                  { $$ = new NVariableDeclaration(*$1, *(new NIdentifier(*$2)), *$4); }
                 ;
 
 type_specifier :  T_int
@@ -88,9 +87,9 @@ params_list : params_list T_comma param
            ;
 
 param : type_specifier  T_identifier
-        { $$ = new NVariableDeclaration(*$1, *$2); }
+        { $$ = new NVariableDeclaration(*$1, *(new NIdentifier(*$2))); }
       | type_specifier T_identifier T_lbracket T_rbracket
-        { $$ = new NVariableDeclaration(*$1, *$2); }
+        { $$ = new NVariableDeclaration(*$1, *(new NIdentifier(*$2))); }
       ;
 
 compound_stmt : T_lbrace local_declarations statement_list T_rbrace
@@ -110,7 +109,7 @@ statement_list : statement_list statement
                ;
 
 statement : T_if T_lparen expression T_rparen statement1  T_else statement
-            { $$ = new NIfStatement(*$3, *$5, *$7); }
+            { $$ = new NIfElseStatement(*$3, *$5, *$7); }
           | T_if T_lparen expression T_rparen statement
             { $$ = new NIfStatement(*$3, *$5); }
           | expression_stmt
@@ -124,7 +123,7 @@ statement : T_if T_lparen expression T_rparen statement1  T_else statement
           ;
 
 statement1 : T_if T_lparen expression T_rparen statement1 T_else statement1
-             { $$ = new NIfStatement(*$3, *$5, *$7); }
+             { $$ = new NIfElseStatement(*$3, *$5, *$7); }
            | expression_stmt
              { $$ = $<expr>1; }
            | compound_stmt
@@ -135,7 +134,6 @@ statement1 : T_if T_lparen expression T_rparen statement1 T_else statement1
              { $$ = $<expr>1; }
            ;
 
-        
 expression_stmt : expression T_semicolon
                   { $$ = $<stmt>1; }
                 | T_semicolon
@@ -181,7 +179,6 @@ relop : T_lte
       | T_eql
       | T_neq
       ;
-
 
 additive_expression : additive_expression addop term
                       { $$ = new NBinaryOperator(*$1, *$3, $2); }

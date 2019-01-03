@@ -164,11 +164,11 @@ public:
 class NVariableDeclaration : public NStatement {
 public:
     const NIdentifier& type;
-    std::string id;
+    NIdentifier& id;
     std::string arrayRange;
-    NVariableDeclaration(const NIdentifier& type, std::string& id) :
+    NVariableDeclaration(const NIdentifier& type, NIdentifier& id) :
         type(type), id(id) { }
-    NVariableDeclaration(const NIdentifier& type, std::string& id, std::string arrayRange) :
+    NVariableDeclaration(const NIdentifier& type, NIdentifier& id, std::string arrayRange) :
         type(type), id(id), arrayRange(arrayRange) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
@@ -177,7 +177,7 @@ public:
         puts("Variable Declaration");
         type.print(depth+1);for(int i=0;i<=depth;i++)
             printf("    ");
-        std::cout<<"Id: "<<id<<std::endl;
+        std::cout<<"Id: "<<id.name<<std::endl;
         if(arrayRange.length()){
             for(int i=0;i<=depth;i++)
                 printf("    ");
@@ -249,11 +249,24 @@ public:
 class NIfStatement: public NExpression {
 public:
     NExpression& condition;
-    NExpression trueblock;
-    NExpression falseblock;
+    NExpression& trueblock;
     NIfStatement(NExpression& condition, NExpression& trueblock) :
         condition(condition), trueblock(trueblock) { }
-    NIfStatement(NExpression& condition, NExpression& trueblock, NExpression& falseblock) :
+    void print(int depth)const{
+        for(int i=0;i<depth;i++)
+            printf("    ");
+        puts("If");
+        condition.print(depth+1);
+        trueblock.print(depth+1);
+    }
+};
+
+class NIfElseStatement: public NExpression {
+public:
+    NExpression& condition;
+    NExpression& trueblock;
+    NExpression& falseblock;
+    NIfElseStatement(NExpression& condition, NExpression& trueblock, NExpression& falseblock) :
         condition(condition), trueblock(trueblock), falseblock(falseblock) { }
     void print(int depth)const{
         for(int i=0;i<depth;i++)
@@ -261,6 +274,7 @@ public:
         puts("If");
         condition.print(depth+1);
         trueblock.print(depth+1);
+        puts("Else");
         falseblock.print(depth+1);
     }
 };
@@ -268,7 +282,7 @@ public:
 class NIterationStatement: public NExpression {
 public:
     NExpression& condition;
-    NExpression iterateblock;
+    NExpression& iterateblock;
     NIterationStatement(NExpression& condition, NExpression& iterateblock) :
         condition(condition), iterateblock(iterateblock) { }   
     void print(int depth)const{
