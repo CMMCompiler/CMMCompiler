@@ -252,15 +252,15 @@ public:
 
 class NReturnStatement: public NExpression {
 public:
-    NExpression result;
+    NExpression* result;
     NReturnStatement() { }
-    NReturnStatement(NExpression& result) :
+    NReturnStatement(NExpression* result) :
         result(result) { }
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
         puts("Return");
-        result.print(depth+1);
+        if(result!=NULL)result->print(depth+1);
     }
 };
 

@@ -151,7 +151,7 @@ iteration_stmt1 :  T_while T_lparen expression T_rparen statement1
 return_stmt :  T_return T_semicolon
                { $$ = new NReturnStatement(); }
             |  T_return expression T_semicolon
-               { $$ = new NReturnStatement(*$2); }
+               { $$ = new NReturnStatement($2);}
             ;
 
 expression : var T_assign expression
