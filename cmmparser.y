@@ -23,8 +23,8 @@ void yyerror (char const *s) {
 	int token;
 }
 
-%token <token> T_lt T_gt T_lte T_gte T_eql T_neq 
 %token <string> T_intconst T_identifier T_void T_int 
+%token <token> T_lt T_gt T_lte T_gte T_eql T_neq 
 %token <token> T_while T_if T_else T_return
 %token <token> T_add T_minus T_times T_divide T_assign
 %token <token> T_lparen T_rparen T_lbracket T_rbracket T_lbrace T_rbrace T_semicolon T_comma
@@ -38,15 +38,12 @@ void yyerror (char const *s) {
 %type <block> program declaration_list compound_stmt
 %type <token> relop addop mulop
 
-%left '+' '-'
-%left '*' '/'
-
 %start program
 
 %%
 
 program : declaration_list
-          { programBlock = $1; }
+          { programBlock = $1; printf("233");}
         ;
 
 declaration_list : declaration_list declaration
@@ -75,13 +72,13 @@ type_specifier :  T_int
                ;
 
 fun_declaration : type_specifier T_identifier T_lparen params T_rparen compound_stmt
-                  { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6);}
+                  { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4;}
                 ;
 
 params : params_list
          { $$ = $1; }
        |  T_void
-         { $$ = NULL; }
+         { $$ = new VariableList(); }
        ;
 
 params_list : params_list T_comma param
@@ -92,24 +89,24 @@ params_list : params_list T_comma param
 
 param : type_specifier  T_identifier
         { $$ = new NVariableDeclaration(*$1, *$2); }
-      | type_specifier  T_identifier T_lbracket T_rbracket
+      | type_specifier T_identifier T_lbracket T_rbracket
         { $$ = new NVariableDeclaration(*$1, *$2); }
       ;
 
 compound_stmt : T_lbrace local_declarations statement_list T_rbrace
-                { $$ = new NCompoundStatementDeclaration(*$2, *$3); $2 = new StatementList(); $3 = new ExpressionList() ;}
+                { $$ = new NCompoundStatementDeclaration(*$2, *$3);  }
               ;
 
 local_declarations : local_declarations var_declaration
-                     { $1->push_back($2); }
+                     { $1->push_back($2);}
                    | empty
-                     { $$ = NULL; }
+                     { $$ = new StatementList();}
                    ;
 
 statement_list : statement_list statement
                  { $1->push_back($2); }
                | empty
-                 { $$ = NULL; }
+                 { $$ = new ExpressionList(); }
                ;
 
 statement : T_if T_lparen expression T_rparen statement1  T_else statement
@@ -126,7 +123,7 @@ statement : T_if T_lparen expression T_rparen statement1  T_else statement
             { $$ = $<expr>1; }
           ;
 
-statement1 : T_if T_lparen expression T_rparen statement1  T_else statement1
+statement1 : T_if T_lparen expression T_rparen statement1 T_else statement1
              { $$ = new NIfStatement(*$3, *$5, *$7); }
            | expression_stmt
              { $$ = $<expr>1; }
@@ -145,8 +142,6 @@ expression_stmt : expression T_semicolon
                   { $$ = NULL; }
                 ;
 
-
-
 iteration_stmt :  T_while T_lparen expression T_rparen statement
                   { $$ = new NIterationStatement(*$3, *$5); }
                ;
@@ -161,7 +156,7 @@ return_stmt :  T_return T_semicolon
                { $$ = new NReturnStatement(*$2); }
             ;
 
-expression : var '=' expression
+expression : var T_assign expression
              { $$ = new NAssignment(*$1, *$3); }
            | simple_expression
              { $$ = $1; }

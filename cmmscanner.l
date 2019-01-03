@@ -16,8 +16,11 @@ NUM         ({DIGIT}{DIGIT}*)
 ID          ({LETTER}{LETTER}*)
 OPERATOR    ([+-/*<>=;,(){}])
 
+%option noyywrap
+
 %%
-[ \t\r\a\n] ;
+[ \t\r\a\n] { }
+("/*"(([^\*]*(\*[^\/])?)*)"*/") { }
 "else" { puts("T_else");return TOKEN(T_else); }
 "if" { puts("T_if");return TOKEN(T_if); }
 "int" { SAVE_TOKEN;puts("T_int");return T_int; }
@@ -49,7 +52,3 @@ OPERATOR    ([+-/*<>=;,(){}])
 [0-9]+  				SAVE_TOKEN; puts("T_intconst"); return T_intconst;
 . printf("Unknown token:%s\n", yytext); yyterminate();
 %%
-
-int yywrap(void) {
-    return 1;
-}

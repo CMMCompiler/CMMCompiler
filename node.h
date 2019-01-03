@@ -118,7 +118,7 @@ class NCompoundStatementDeclaration: public NBlock {
 public:
     StatementList statelist;
     ExpressionList expressionlist;
-    NCompoundStatementDeclaration(StatementList statelist, ExpressionList expressionlist) :
+    NCompoundStatementDeclaration(StatementList& statelist, ExpressionList& expressionlist) :
         statelist(statelist), expressionlist(expressionlist) { }
 };
 
