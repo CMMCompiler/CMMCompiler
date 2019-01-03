@@ -43,7 +43,7 @@ void yyerror (char const *s) {
 %%
 
 program : declaration_list
-          { programBlock = $1; printf("233");}
+          { programBlock = $1;}
         ;
 
 declaration_list : declaration_list declaration
