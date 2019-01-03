@@ -3,4 +3,7 @@ int main(void) {
 	if (a == 1) {
 		return 2;
 	}
+	/*
+	Just for test.
+	*/
 }
