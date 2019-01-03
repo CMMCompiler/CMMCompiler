@@ -59,9 +59,14 @@ class NStatement : public Node {
 class NInteger : public NExpression {
 public:
     long long value;
-    NInteger(long long value) : value(value) { }
+    NInteger(long long value) : value(value) {}
     // virtual llvm::Value* codeGen(CodeGenContext& context);
-    void print(int depth){printf("Int value: ");std::cout<<value<<std::endl;}
+    void print(int depth)const{
+        for(int i=0;i<depth;i++)
+            printf("    ");
+        printf("Int value: ");
+        std::cout<<value<<std::endl;
+    }
 };
 
 class NDouble : public NExpression {
@@ -69,7 +74,12 @@ public:
     double value;
     NDouble(double value) : value(value) { }
     // virtual llvm::Value* codeGen(CodeGenContext& context);
-    void print(int depth){printf("Double value: ");std::cout<<value<<std::endl;}
+    void print(int depth)const{
+        for(int i=0;i<depth;i++)
+            printf("    ");
+        printf("Double value: ");
+        std::cout<<value<<std::endl;
+    }
 };
 
 // used
@@ -125,7 +135,6 @@ public:
             printf("    ");
         printf("Op: ");
         print_token(op);
-        puts("");
         lhs.print(depth+1);
         rhs.print(depth+1);
     }
@@ -147,7 +156,6 @@ public:
             printf("    ");
         printf("Op: ");
         print_token(op);
-        puts("");
         lhs.print(depth+1);
         rhs.print(depth+1);
     }

@@ -183,7 +183,7 @@ relop : T_lte
 additive_expression : additive_expression addop term
                       { $$ = new NBinaryOperator(*$1, *$3, $2); }
                     | term
-                      { $$ = $1; }
+                      { $$ = $1;}
                     ;
 
 addop : T_add
@@ -193,7 +193,7 @@ addop : T_add
 term : term mulop factor
        { $$ = new NBinaryOperator(*$1, *$3, $2);}
      | factor
-       { $$ = $1; }
+       { $$ = $1;}
      ;
 
 mulop : T_times
@@ -207,7 +207,7 @@ factor : T_lparen expression T_rparen
        | call
          { $$ = $1; }
        | T_intconst
-         { $$ = new NInteger(atol($1->c_str())); }
+         { $$ = new NInteger(atol($1->c_str()));}
        ;
 
 call :  T_identifier T_lparen args T_rparen

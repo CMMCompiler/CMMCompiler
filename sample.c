@@ -1,5 +1,6 @@
 int main(void) {
 	int a;
+	int b;
 	if (a == 1) {
 		return 2;
 	}
