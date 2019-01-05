@@ -231,14 +231,3 @@ arg_list : arg_list T_comma expression
 empty : /* empty */
       ;
 %%
-
-int main() {
-    /*char name[1000];
-    puts("Input File Name:");
-    scanf("%s",name);
-    freopen(name,"r",stdin);*/
-    if(!yyparse()){
-      programBlock->print(0);
-    }
-  return 0;
-}

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-// #include <llvm/Value.h>
+#include <llvm/IR/Value.h>
 
 class CodeGenContext;
 class NStatement;
@@ -51,16 +51,20 @@ public:
 };
 
 class NExpression : public Node {
+public:
+    virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class NStatement : public Node {
+public:
+    virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class NInteger : public NExpression {
 public:
     long long value;
     NInteger(long long value) : value(value) {}
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -73,7 +77,7 @@ class NDouble : public NExpression {
 public:
     double value;
     NDouble(double value) : value(value) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -90,7 +94,7 @@ public:
     NIdentifier(std::string& name) : name(name) { }
     NIdentifier(std::string& name, NExpression* expression) :
         name(name), expression(expression) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -109,24 +113,24 @@ public:
     }
 };
 
-class NMethodCall : public NExpression {
-public:
-    const NIdentifier& id;
-    ExpressionList arguments;
-    NMethodCall(const NIdentifier& id, ExpressionList& arguments) :
-        id(id), arguments(arguments) { }
-    NMethodCall(const NIdentifier& id) : id(id) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
-    void print(int depth)const{
-        for(int i=0;i<depth;i++)
-            printf("    ");
-        puts("Method Call");
-        id.print(depth+1);
-        for(auto it=arguments.begin();it!=arguments.end();it++){
-            (*it)->print(depth+1);
-        }
-    }
-};
+// class NMethodCall : public NExpression {
+// public:
+//     const NIdentifier& id;
+//     ExpressionList arguments;
+//     NMethodCall(const NIdentifier& id, ExpressionList& arguments) :
+//         id(id), arguments(arguments) { }
+//     NMethodCall(const NIdentifier& id) : id(id) { }
+//     virtual llvm::Value* codeGen(CodeGenContext& context);
+//     void print(int depth)const{
+//         for(int i=0;i<depth;i++)
+//             printf("    ");
+//         puts("Method Call");
+//         id.print(depth+1);
+//         for(auto it=arguments.begin();it!=arguments.end();it++){
+//             (*it)->print(depth+1);
+//         }
+//     }
+// };
 
 class NBinaryOperator : public NExpression {
 public:
@@ -135,7 +139,7 @@ public:
     NExpression& rhs;
     NBinaryOperator(NExpression& lhs, NExpression& rhs, int op) :
         lhs(lhs), rhs(rhs), op(op) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -156,7 +160,7 @@ public:
     NExpression& rhs;
     NComparisonExpression(NExpression& lhs, NExpression& rhs, int op) :
         lhs(lhs), rhs(rhs), op(op) { }
-        
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -176,7 +180,7 @@ public:
     NExpression& rhs;
     NAssignment(NIdentifier& lhs, NExpression& rhs) : 
         lhs(lhs), rhs(rhs) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -191,7 +195,7 @@ class NBlock : public NExpression {
 public:
     StatementList statements;
     NBlock() { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(auto it=statements.begin();it!=statements.end();it++)
             (*it)->print(depth+1);
@@ -203,7 +207,7 @@ public:
     NExpression& expression;
     NExpressionStatement(NExpression& expression) : 
         expression(expression) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -223,7 +227,7 @@ public:
         type(type), id(id) { }
     NVariableDeclaration(const NIdentifier& type, NIdentifier& id, std::string arrayRange) :
         type(type), id(id), arrayRange(arrayRange) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -245,6 +249,7 @@ public:
     ExpressionList expressionlist;
     NCompoundStatementDeclaration(StatementList& statelist, ExpressionList& expressionlist) :
         statelist(statelist), expressionlist(expressionlist) { }
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -264,6 +269,7 @@ public:
     NReturnStatement() { }
     NReturnStatement(NExpression* result) :
         result(result) { }
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -282,7 +288,7 @@ public:
     NFunctionDeclaration(const NIdentifier& type, std::string& id, 
             const VariableList& arguments, NBlock& block) :
         type(type), id(id), arguments(arguments), block(block) { }
-    // virtual llvm::Value* codeGen(CodeGenContext& context);
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -305,6 +311,7 @@ public:
     NExpression& trueblock;
     NIfStatement(NExpression& condition, NExpression& trueblock) :
         condition(condition), trueblock(trueblock) { }
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -321,6 +328,7 @@ public:
     NExpression& falseblock;
     NIfElseStatement(NExpression& condition, NExpression& trueblock, NExpression& falseblock) :
         condition(condition), trueblock(trueblock), falseblock(falseblock) { }
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -340,6 +348,7 @@ public:
     NExpression& iterateblock;
     NIterationStatement(NExpression& condition, NExpression& iterateblock) :
         condition(condition), iterateblock(iterateblock) { }   
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
@@ -355,6 +364,7 @@ public:
     ExpressionList& arglist;
     NCallNode(std::string id, ExpressionList& arglist) :
         id(id), arglist(arglist) { }
+    virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
             printf("    ");
