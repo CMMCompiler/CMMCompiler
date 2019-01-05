@@ -22,16 +22,21 @@ apt-get install flex bison
 
 ## Run
 
-### MacOS & Ubuntu
+### MacOS
 ```
 bison -d -o cmmparser.cpp cmmparser.y
 flex -o cmmscanner.cpp cmmscanner.l
 gcc -o cmm cmmparser.cpp cmmscanner.cpp
 ./cmm < sample.c
 ```
+### Ubuntu
+```
+sh run.sh
+./test < sample.c
+```
 
 ### Windows
 ```
 .\run.bat
-.\cmm.exe < sample.c
+.\test.exe < sample.c
 ```
