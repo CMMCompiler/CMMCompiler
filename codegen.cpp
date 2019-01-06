@@ -10,16 +10,16 @@ void CodeGenContext::generateCode(NBlock& root)
 	std::cout << "Generating code...\n";
 	
 	/* Create the top level interpreter function to call as entry */
-	vector<Type*> argTypes;
+	std::vector<Type*> argTypes;
 	FunctionType *ftype = FunctionType::get(Type::getVoidTy(MyContext), makeArrayRef(argTypes), false);
-	mainFunction = Function::Create(ftype, GlobalValue::InternalLinkage, "main", module);
-	BasicBlock *bblock = BasicBlock::Create(MyContext, "entry", mainFunction, 0);
+	mainFunction = Function::Create(ftype, GlobalValue::InternalLinkage, "main");
+	BasicBlock *bblock = BasicBlock::Create(MyContext, "entry");
 	
 	/* Push a new variable/block context */
-	pushBlock(bblock);
+	// pushBlock(bblock);
 	root.codeGen(*this); /* emit bytecode for the toplevel block */
-	ReturnInst::Create(MyContext, bblock);
-	popBlock();
+	// ReturnInst::Create(MyContext, bblock);
+	// popBlock();
 	
 	/* Print the bytecode in a human-readable format 
 	   to see if our program compiled properly
@@ -47,10 +47,8 @@ GenericValue CodeGenContext::runCode() {
 static Type *typeOf(const NIdentifier& type) 
 {
 	if (type.name.compare("int") == 0) {
+		std::cout<<"int"<<endl;
 		return Type::getInt64Ty(MyContext);
-	}
-	else if (type.name.compare("double") == 0) {
-		return Type::getDoubleTy(MyContext);
 	}
 	return Type::getVoidTy(MyContext);
 }
@@ -78,22 +76,6 @@ Value* NIdentifier::codeGen(CodeGenContext& context)
 	}
 	return new LoadInst(context.locals()[name], "", false, context.currentBlock());
 }
-
-// Value* NMethodCall::codeGen(CodeGenContext& context)
-// {
-// 	Function *function = context.module->getFunction(id.name.c_str());
-// 	if (function == NULL) {
-// 		std::cerr << "no such function " << id.name << endl;
-// 	}
-// 	std::vector<Value*> args;
-// 	ExpressionList::const_iterator it;
-// 	for (it = arguments.begin(); it != arguments.end(); it++) {
-// 		args.push_back((**it).codeGen(context));
-// 	}
-// 	CallInst *call = CallInst::Create(function, makeArrayRef(args), "", context.currentBlock());
-// 	std::cout << "Creating method call: " << id.name << endl;
-// 	return call;
-// }
 
 Value* NBinaryOperator::codeGen(CodeGenContext& context)
 {
@@ -173,7 +155,6 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 
 	Function::arg_iterator argsValues = function->arg_begin();
     Value* argumentValue;
-
 	for (it = arguments.begin(); it != arguments.end(); it++) {
 		(**it).codeGen(context);
 		
@@ -212,7 +193,18 @@ Value* NComparisonExpression::codeGen(CodeGenContext& context)
 
 Value* NCompoundStatementDeclaration::codeGen(CodeGenContext& context)
 {
-
+	StatementList::const_iterator it;
+	ExpressionList::const_iterator it2;
+	Value *last = NULL;
+	for (it = statelist.begin(); it != statelist.end(); it++) {
+		// std::cout << "Generating code for " << typeid(**it).name() << endl;
+		last = (**it).codeGen(context);
+	}
+	for (it2 = expressionlist.begin(); it2 != expressionlist.end(); it2++) {
+		last = (**it2).codeGen(context);
+	}
+	std::cout << "Creating Compound" << endl;
+	return last;
 }
 
 Value* NCallNode::codeGen(CodeGenContext& context)
