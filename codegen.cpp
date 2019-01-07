@@ -326,7 +326,18 @@ Value* NCompoundStatementDeclaration::codeGen(CodeGenContext& context)
 
 Value* NCallNode::codeGen(CodeGenContext& context)
 {
-
+	Function *function = context.module->getFunction(id.c_str());
+	if (function == NULL) {
+		std::cerr << "no such function " << id << endl;
+	}
+	std::vector<Value*> args;
+	ExpressionList::const_iterator it;
+	for (it = arglist.begin(); it != arglist.end(); it++) {
+		args.push_back((**it).codeGen(context));
+	}
+	CallInst *call = CallInst::Create(function, makeArrayRef(args), "", context.currentBlock());
+	std::cout << "Creating method call: " << id << endl;
+	return call;
 }
 
 Value* NExpression::codeGen(CodeGenContext& context)
