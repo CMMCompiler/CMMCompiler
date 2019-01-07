@@ -3,6 +3,8 @@
 #include "cmmparser.hpp"
 
 using namespace std;
+#define ISTYPE(value, id) (value->getType()->getTypeID() == id)
+static Type *typeOf(const NIdentifier& type, CodeGenContext& context);
 
 /* Compile the AST into a module */
 void CodeGenContext::generateCode(NBlock& root)
@@ -16,10 +18,10 @@ void CodeGenContext::generateCode(NBlock& root)
 	BasicBlock *bblock = BasicBlock::Create(MyContext, "entry");
 	
 	/* Push a new variable/block context */
-	// pushBlock(bblock);
+	pushBlock(bblock);
 	root.codeGen(*this); /* emit bytecode for the toplevel block */
 	// ReturnInst::Create(MyContext, bblock);
-	// popBlock();
+	popBlock();
 	
 	/* Print the bytecode in a human-readable format 
 	   to see if our program compiled properly
@@ -30,6 +32,19 @@ void CodeGenContext::generateCode(NBlock& root)
 	legacy::PassManager pm;
 	pm.add(createPrintModulePass(outs()));
 	pm.run(*module);
+}
+
+static Value* CastToBoolean(CodeGenContext& context, Value* condValue){
+
+    if( ISTYPE(condValue, Type::IntegerTyID) ){
+        condValue = context.builder.CreateIntCast(condValue, Type::getInt1Ty(context.MyContext), true);
+        return context.builder.CreateICmpNE(condValue, ConstantInt::get(Type::getInt1Ty(context.MyContext), 0, true));
+    }else if( ISTYPE(condValue, Type::DoubleTyID) ){
+        return context.builder.CreateFCmpONE(condValue, ConstantFP::get(context.MyContext, APFloat(0.0)));
+    }else{
+		std::cout<< "no castToBoolean" <<std::endl;
+        return condValue;
+    }
 }
 
 /* Executes the AST by running the main function */
@@ -44,13 +59,13 @@ GenericValue CodeGenContext::runCode() {
 }
 
 /* Returns an LLVM type based on the identifier */
-static Type *typeOf(const NIdentifier& type) 
+static Type *typeOf(const NIdentifier& type, CodeGenContext& context) 
 {
 	if (type.name.compare("int") == 0) {
 		std::cout<<"int"<<endl;
-		return Type::getInt64Ty(MyContext);
+		return Type::getInt64Ty(context.MyContext);
 	}
-	return Type::getVoidTy(MyContext);
+	return Type::getVoidTy(context.MyContext);
 }
 
 /* -- Code Generation -- */
@@ -58,13 +73,13 @@ static Type *typeOf(const NIdentifier& type)
 Value* NInteger::codeGen(CodeGenContext& context)
 {
 	std::cout << "Creating integer: " << value << endl;
-	return ConstantInt::get(Type::getInt64Ty(MyContext), value, true);
+	return ConstantInt::get(Type::getInt64Ty(context.MyContext), value, true);
 }
 
 Value* NDouble::codeGen(CodeGenContext& context)
 {
 	std::cout << "Creating double: " << value << endl;
-	return ConstantFP::get(Type::getDoubleTy(MyContext), value);
+	return ConstantFP::get(Type::getDoubleTy(context.MyContext), value);
 }
 
 Value* NIdentifier::codeGen(CodeGenContext& context)
@@ -135,7 +150,7 @@ Value* NReturnStatement::codeGen(CodeGenContext& context)
 Value* NVariableDeclaration::codeGen(CodeGenContext& context)
 {
 	std::cout << "Creating variable declaration " << type.name << " " << id.name << endl;
-	AllocaInst *alloc = new AllocaInst(typeOf(type), id.name.c_str(), context.currentBlock());
+	AllocaInst *alloc = new AllocaInst(typeOf(type, context), id.name.c_str(), context.currentBlock());
 	context.locals()[id.name] = alloc;
 	return alloc;
 }
@@ -145,11 +160,11 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 	vector<Type*> argTypes;
 	VariableList::const_iterator it;
 	for (it = arguments.begin(); it != arguments.end(); it++) {
-		argTypes.push_back(typeOf((**it).type));
+		argTypes.push_back(typeOf((**it).type, context));
 	}
-	FunctionType *ftype = FunctionType::get(typeOf(type), makeArrayRef(argTypes), false);
+	FunctionType *ftype = FunctionType::get(typeOf(type, context), makeArrayRef(argTypes), false);
 	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.c_str(), context.module);
-	BasicBlock *bblock = BasicBlock::Create(MyContext, "entry", function, 0);
+	BasicBlock *bblock = BasicBlock::Create(context.MyContext, "entry", function, 0);
 
 	context.pushBlock(bblock);
 
@@ -164,7 +179,7 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 	}
 	
 	block.codeGen(context);
-	ReturnInst::Create(MyContext, context.getCurrentReturnValue(), bblock);
+	ReturnInst::Create(context.MyContext, context.getCurrentReturnValue(), bblock);
 
 	context.popBlock();
 	std::cout << "Creating function: " << id << endl;
@@ -173,12 +188,60 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 
 Value* NIfStatement::codeGen(CodeGenContext& context)
 {
-
+	cout << "Generating if statement" << endl;
+	Value* condValue = condition.codeGen(context);
+	if (!condValue ) {
+		return nullptr;
+	}
+	condValue = CastToBoolean(context, condValue);
+	Function* theFunction = context.currentBlock()->getParent();
+	BasicBlock *ifTrue = BasicBlock::Create(context.MyContext, "then", theFunction, 0);
+	BasicBlock *mergeBB = BasicBlock::Create(context.MyContext, "ifcont");
+	Value *last = NULL;
+	BranchInst::Create(ifTrue, mergeBB, condValue, context.currentBlock());
+	context.pushBlock(ifTrue);
+	last = trueblock.codeGen(context);
+	last = BranchInst::Create(mergeBB, context.currentBlock());
+	context.popBlock();
+	theFunction->getBasicBlockList().push_back(mergeBB);        //
+    context.builder.SetInsertPoint(mergeBB);
+	ReturnInst::Create(context.MyContext, mergeBB); //for test
+	//context.pushBlock(mergeBB);
+	return last;
 }
 
 Value* NIfElseStatement::codeGen(CodeGenContext& context)
 {
+	cout << "Generating ifelse statement" << endl;
+	Value* condValue = condition.codeGen(context);
+	if (!condValue ) {
+		return nullptr;
+	}
+	condValue = CastToBoolean(context, condValue);
+	Function* theFunction = context.currentBlock()->getParent();
+	BasicBlock *ifTrue = BasicBlock::Create(context.MyContext, "then", theFunction, 0);
+	BasicBlock *ifFalse = BasicBlock::Create(context.MyContext, "else");
+	BasicBlock *mergeBB = BasicBlock::Create(context.MyContext, "ifcont");
 
+	Value *last = NULL;
+	BranchInst::Create(ifTrue, ifFalse, condValue, context.currentBlock());
+	context.pushBlock(ifTrue);
+	last = trueblock.codeGen(context);
+	last = BranchInst::Create(mergeBB, context.currentBlock());
+	context.popBlock();
+
+	theFunction->getBasicBlockList().push_back(ifFalse);
+	context.builder.SetInsertPoint(ifFalse);
+	context.pushBlock(ifFalse);
+	last = falseblock.codeGen(context);
+	last = BranchInst::Create(mergeBB, context.currentBlock());
+	context.popBlock();
+
+	theFunction->getBasicBlockList().push_back(mergeBB);
+    context.builder.SetInsertPoint(mergeBB);
+	ReturnInst::Create(context.MyContext, mergeBB);
+	//context.pushBlock(mergeBB);
+	return last;	
 }
 
 Value* NIterationStatement::codeGen(CodeGenContext& context)
@@ -188,7 +251,23 @@ Value* NIterationStatement::codeGen(CodeGenContext& context)
 
 Value* NComparisonExpression::codeGen(CodeGenContext& context)
 {
+	std::cout << "Creating comparison operation " << op << endl;
+	CmpInst::Predicate com;
+	switch (op) {
+		case T_eql:		com = CmpInst::ICMP_EQ; goto compare;
+		case T_neq:		com = CmpInst::ICMP_NE; goto compare;
+		case T_lt:		com = CmpInst::ICMP_SLT;goto compare;
+		case T_lte:		com = CmpInst::ICMP_SLE;goto compare;
+		case T_gt:		com = CmpInst::ICMP_SGT;goto compare;
+		case T_gte:		com = CmpInst::ICMP_SGE;goto compare;
+				
+		/* TODO comparison */
+	}
 
+	return NULL;
+compare:
+	return CmpInst::Create(*(new Instruction::OtherOps), com, lhs.codeGen(context), 
+		rhs.codeGen(context), "", context.currentBlock());
 }
 
 Value* NCompoundStatementDeclaration::codeGen(CodeGenContext& context)
