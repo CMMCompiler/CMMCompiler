@@ -214,7 +214,7 @@ Value* NIfStatement::codeGen(CodeGenContext& context)
 	BasicBlock *mergeBB = BasicBlock::Create(context.MyContext, "ifcont");
 	Value *last = NULL;
 	BranchInst::Create(ifTrue, mergeBB, condValue, context.currentBlock());
-	context.pushBlock(ifTrue);
+	context.pushBlock(ifTrue, context.locals());
 	last = trueblock.codeGen(context);
 	last = BranchInst::Create(mergeBB, context.currentBlock());
 	context.popBlock();
@@ -240,14 +240,14 @@ Value* NIfElseStatement::codeGen(CodeGenContext& context)
 
 	Value *last = NULL;
 	BranchInst::Create(ifTrue, ifFalse, condValue, context.currentBlock());
-	context.pushBlock(ifTrue);
+	context.pushBlock(ifTrue, context.locals());
 	last = trueblock.codeGen(context);
 	last = BranchInst::Create(mergeBB, context.currentBlock());
 	context.popBlock();
 
 	theFunction->getBasicBlockList().push_back(ifFalse);
 	context.builder.SetInsertPoint(ifFalse);
-	context.pushBlock(ifFalse);
+	context.pushBlock(ifFalse, context.locals());
 	last = falseblock.codeGen(context);
 	last = BranchInst::Create(mergeBB, context.currentBlock());
 	context.popBlock();
@@ -273,7 +273,7 @@ Value* NIterationStatement::codeGen(CodeGenContext& context)
 	Value* last = NULL;
 	condValue = CastToBoolean(context, condValue);
 	BranchInst::Create(whileBlock, afterBlock, condValue, context.currentBlock());	
-	context.pushBlock(whileBlock);
+	context.pushBlock(whileBlock, context.locals());
 	last = iterateblock.codeGen(context);
 	last = BranchInst::Create(whileBlock, context.currentBlock());
 	context.popBlock();
