@@ -73,7 +73,7 @@ type_specifier :  T_int
                ;
 
 fun_declaration : type_specifier T_identifier T_lparen params T_rparen compound_stmt
-                  { $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4;}
+                  { $$ = new NFunctionDeclaration(*$1, *(new NIdentifier(*$2)), *$4, *$6); delete $4;}
                 ;
 
 params : params_list
@@ -213,7 +213,7 @@ factor : T_lparen expression T_rparen
        ;
 
 call :  T_identifier T_lparen args T_rparen
-        { $$ = new NCallNode(*$1, *$3); }
+        { $$ = new NCallNode(*(new NIdentifier(*$1)), *$3); }
      ;
 
 args : arg_list

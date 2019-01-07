@@ -173,10 +173,10 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 		argTypes.push_back(typeOf((**it).type, context));
 	}
 	FunctionType *ftype = FunctionType::get(typeOf(type, context), makeArrayRef(argTypes), false);
-	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.c_str(), context.module);
+	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.name.c_str(), context.module);
 	BasicBlock *bblock = BasicBlock::Create(context.MyContext, "entry", function, 0);
 
-	if (id == "main"){
+	if (id.name == "main"){
 		myMainFunction = function;
 		mainFunctionNum ++;
 	}
@@ -197,7 +197,7 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 	ReturnInst::Create(context.MyContext, context.getCurrentReturnValue(), bblock);
 
 	context.popBlock();
-	std::cout << "Creating function: " << id << endl;
+	std::cout << "Creating function: " << id.name << endl;
 	return function;
 }
 
@@ -326,9 +326,9 @@ Value* NCompoundStatementDeclaration::codeGen(CodeGenContext& context)
 
 Value* NCallNode::codeGen(CodeGenContext& context)
 {
-	Function *function = context.module->getFunction(id.c_str());
+	Function *function = context.module->getFunction(id.name.c_str());
 	if (function == NULL) {
-		std::cerr << "no such function " << id << endl;
+		std::cerr << "no such function " << id.name << endl;
 	}
 	std::vector<Value*> args;
 	ExpressionList::const_iterator it;
@@ -336,7 +336,7 @@ Value* NCallNode::codeGen(CodeGenContext& context)
 		args.push_back((**it).codeGen(context));
 	}
 	CallInst *call = CallInst::Create(function, makeArrayRef(args), "", context.currentBlock());
-	std::cout << "Creating method call: " << id << endl;
+	std::cout << "Creating method call: " << id.name << endl;
 	return call;
 }
 

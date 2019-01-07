@@ -282,10 +282,10 @@ public:
 class NFunctionDeclaration : public NStatement {
 public:
     const NIdentifier& type;
-    std::string id;
+    NIdentifier& id;
     VariableList arguments;
     NBlock& block;
-    NFunctionDeclaration(const NIdentifier& type, std::string& id, 
+    NFunctionDeclaration(const NIdentifier& type, NIdentifier& id, 
             const VariableList& arguments, NBlock& block) :
         type(type), id(id), arguments(arguments), block(block) { }
     virtual llvm::Value* codeGen(CodeGenContext& context);
@@ -296,7 +296,7 @@ public:
         type.print(depth+1);
         for(int i=0;i<=depth;i++)
             printf("    ");
-        std::cout<<"Id: "<<id<<std::endl;
+        std::cout<<"Id: "<<id.name<<std::endl;
         for(auto it=arguments.begin();it!=arguments.end();it++){
             (*it)->print(depth+1);
         }
@@ -360,9 +360,9 @@ public:
 
 class NCallNode: public NExpression {
 public:
-    std::string id;
+    NIdentifier& id;
     ExpressionList& arglist;
-    NCallNode(std::string id, ExpressionList& arglist) :
+    NCallNode(NIdentifier& id, ExpressionList& arglist) :
         id(id), arglist(arglist) { }
     virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
@@ -372,7 +372,7 @@ public:
         for (int i=0;i<depth+1;i++) {
             printf("    ");
         }
-        std::cout<<"function_name: "<<id<<std::endl;
+        std::cout<<"function_name: "<<id.name<<std::endl;
         for(auto it=arglist.begin();it!=arglist.end();it++) {
             (*it)->print(depth+1);
         }
