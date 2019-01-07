@@ -7,16 +7,17 @@ using namespace std;
 extern int yyparse();
 extern NBlock* programBlock;
 
+void createCoreFunctions(CodeGenContext& context);
 
 int main() {
-    // if (!yyparse()) {
-    //     programBlock->print(0);
-    // }
-	yyparse();
-    InitializeNativeTarget();
-	InitializeNativeTargetAsmPrinter();
-	InitializeNativeTargetAsmParser();
-	CodeGenContext context;
-	context.generateCode(*programBlock);
-	context.runCode();
+    if (!yyparse()) {
+        programBlock->print(0);
+		InitializeNativeTarget();
+		InitializeNativeTargetAsmPrinter();
+		InitializeNativeTargetAsmParser();
+		CodeGenContext context;
+		createCoreFunctions(context);
+		context.generateCode(*programBlock);
+		context.runCode();
+    }
 }
