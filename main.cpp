@@ -18,5 +18,5 @@ int main() {
 	InitializeNativeTargetAsmParser();
 	CodeGenContext context;
 	context.generateCode(*programBlock);
-	// context.runCode();
+	context.runCode();
 }

@@ -5,6 +5,8 @@
 using namespace std;
 #define ISTYPE(value, id) (value->getType()->getTypeID() == id)
 static Type *typeOf(const NIdentifier& type, CodeGenContext& context);
+Function* myMainFunction;
+int mainFunctionNum = 0;
 
 /* Compile the AST into a module */
 void CodeGenContext::generateCode(NBlock& root)
@@ -49,11 +51,19 @@ static Value* CastToBoolean(CodeGenContext& context, Value* condValue){
 
 /* Executes the AST by running the main function */
 GenericValue CodeGenContext::runCode() {
+	if (mainFunctionNum == 0){
+		cout<< "ERROR: no main fun" <<endl;
+		exit(0);
+	}else 
+	if (mainFunctionNum != 1){
+		cout<< "ERROR: too many main fun" <<endl;
+		exit(0);
+	}
 	std::cout << "Running code...\n";
 	ExecutionEngine *ee = EngineBuilder( unique_ptr<Module>(module) ).create();
 	ee->finalizeObject();
 	vector<GenericValue> noargs;
-	GenericValue v = ee->runFunction(mainFunction, noargs);
+	GenericValue v = ee->runFunction(myMainFunction, noargs);
 	std::cout << "Code was run.\n";
 	return v;
 }
@@ -166,6 +176,11 @@ Value* NFunctionDeclaration::codeGen(CodeGenContext& context)
 	Function *function = Function::Create(ftype, GlobalValue::InternalLinkage, id.c_str(), context.module);
 	BasicBlock *bblock = BasicBlock::Create(context.MyContext, "entry", function, 0);
 
+	if (id == "main"){
+		myMainFunction = function;
+		mainFunctionNum ++;
+	}
+
 	context.pushBlock(bblock);
 
 	Function::arg_iterator argsValues = function->arg_begin();
@@ -246,7 +261,30 @@ Value* NIfElseStatement::codeGen(CodeGenContext& context)
 
 Value* NIterationStatement::codeGen(CodeGenContext& context)
 {
+	cout << "Generating iteration statement" << endl;
+	Function* theFunction = context.currentBlock()->getParent();
+	BasicBlock *whileBlock = BasicBlock::Create(context.MyContext, "forloop", theFunction);
+	BasicBlock *afterBlock = BasicBlock::Create(context.MyContext, "forcont");
 
+	Value* condValue = condition.codeGen(context);
+    if( !condValue )
+        return nullptr;
+
+	Value* last = NULL;
+	condValue = CastToBoolean(context, condValue);
+	BranchInst::Create(whileBlock, afterBlock, condValue, context.currentBlock());	
+	context.pushBlock(whileBlock);
+	last = iterateblock.codeGen(context);
+	last = BranchInst::Create(whileBlock, context.currentBlock());
+	context.popBlock();
+
+	condValue = condition.codeGen(context);
+    condValue = CastToBoolean(context, condValue);
+	BranchInst::Create(whileBlock, afterBlock, condValue, context.currentBlock());	
+
+	theFunction->getBasicBlockList().push_back(afterBlock);
+	context.builder.SetInsertPoint(afterBlock);
+	return last;
 }
 
 Value* NComparisonExpression::codeGen(CodeGenContext& context)
