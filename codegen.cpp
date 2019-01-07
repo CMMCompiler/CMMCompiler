@@ -160,7 +160,13 @@ Value* NReturnStatement::codeGen(CodeGenContext& context)
 Value* NVariableDeclaration::codeGen(CodeGenContext& context)
 {
 	std::cout << "Creating variable declaration " << type.name << " " << id.name << endl;
-	AllocaInst *alloc = new AllocaInst(typeOf(type, context), id.name.c_str(), context.currentBlock());
+	Value* alloc = nullptr;
+	cout<<isArray;
+	if (arrayRange.length()) {
+		alloc = new AllocaInst(ArrayType::get(typeOf(type, context), atoi(arrayRange.c_str())), id.name.c_str(), context.currentBlock()); 	
+	} else {
+		alloc = new AllocaInst(typeOf(type, context), id.name.c_str(), context.currentBlock());
+	}	
 	context.locals()[id.name] = alloc;
 	return alloc;
 }

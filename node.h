@@ -223,10 +223,11 @@ public:
     const NIdentifier& type;
     NIdentifier& id;
     std::string arrayRange;
+    bool isArray;
     NVariableDeclaration(const NIdentifier& type, NIdentifier& id) :
-        type(type), id(id) { }
+        type(type), id(id) { isArray = false; }
     NVariableDeclaration(const NIdentifier& type, NIdentifier& id, std::string arrayRange) :
-        type(type), id(id), arrayRange(arrayRange) { }
+        type(type), id(id), arrayRange(arrayRange) { isArray = true; }
     virtual llvm::Value* codeGen(CodeGenContext& context);
     void print(int depth)const{
         for(int i=0;i<depth;i++)
